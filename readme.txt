@@ -66,8 +66,17 @@ Adding a proper error notification is on the todo-list.
 
 Please open an issue on [Github](https://github.com/senlin/so-remove-icl-promotion/issues)
 
+== Screenshots ==
+
+N/A
+
 == Changelog ==
 
 = 1.0 =
 
 * Release version (2015.04.08)
+
+== Upgrade Notice ==
+
+N/A
+
