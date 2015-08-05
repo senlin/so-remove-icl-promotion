@@ -1,8 +1,8 @@
 # SO Remove ICL Promotion
 
-###### Last updated on 2015.04.08
+###### Last updated on 2015.08.05
 ###### requires at least WordPress 4.0
-###### tested up to WordPress 4.2
+###### tested up to WordPress 4.3
 ###### Author: [Piet Bos](https://github.com/senlin)
 
 
