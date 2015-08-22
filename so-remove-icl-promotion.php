@@ -1,21 +1,21 @@
 <?php
 /**
- * Plugin Name: SO Remove ICL Promotion
+ * Plugin Name: SO Remove Translation Services
  * Plugin URI:  http://wordpress.org/plugins/so-remove-icl-promotion/
- * Description: The SO Remove ICL Promotion plugin removes all promotion for ICanLocalize from the WPML plugin.
- * Version:     1.0
+ * Description: The SO Remove Translation Services plugin removes the block of translation services from the Translation Management > Translators page of the WPML plugin.
+ * Version:     2.0.0
  * Author:      Piet Bos
  * Author URI:  http://so-wp.com/plugins/
  * License:     GPL v3
  * 
  * Copyright (c) 2015, SO WP Plugins
  * 
- * SO Remove ICL Promotion is free software; you can redistribute it and/or modify
+ * SO Remove Translation Services is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  * 
- * SO Remove ICL Promotion is distributed in the hope that it will be useful,
+ * SO Remove Translation Services is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -27,7 +27,7 @@
 /**
  * Prevent direct access to files
  *
- * @since 1.0
+ * @since 1.0.0
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * 
  * adapted from example by Thomas Scholz (@toscho) http://wordpress.stackexchange.com/a/95183/2015, Version: 2013.03.31, Licence: MIT (http://opensource.org/licenses/MIT)
  *
- * @since 1.0
+ * @since 1.0.0
  */
 
 //Only do this when on the Plugins page.
@@ -59,8 +59,7 @@ function soriclp_min_wp_version() {
 	return $errors; 
 }
 
-function soriclp_check_admin_notices()
-{
+function soriclp_check_admin_notices() {
 	$errors = soriclp_min_wp_version();
 
 	if ( empty ( $errors ) )
@@ -79,7 +78,6 @@ function soriclp_check_admin_notices()
 	deactivate_plugins( plugin_basename( __FILE__ ) );
 }
 
-
 if ( ! class_exists( 'SO_Remove_ICL_Promotion' ) ) {
     
     class SO_Remove_ICL_Promotion {
@@ -95,17 +93,17 @@ if ( ! class_exists( 'SO_Remove_ICL_Promotion' ) ) {
          * Class constructor.
          * 
          * - Determines the full filesystem path to wp-config.php.
-         * - Adds the weekly cron to the existing schedules.
-         * - Schedules a hook which will be executed by the WordPress actions core on the weekly interval.
-         * - Attaches the auto salts functionality to the weekly hook.
-         * - Registers activation hook which will add new security keys and salts to wp-config.php for the first time.
-         * - Registers plugin deactivation hook which will remove everything from the weekly schedule.
+         * - Registers activation hook.
+         * - Registers plugin deactivation hook.
+         *
+         * @since 1.0.0
+         * @modified 2.0.0
          */
         function __construct() {
 
             $this->wp_config = $this->soriclp_get_wp_config_path();
 
-            register_activation_hook( __FILE__, array( $this, 'wpconfig_add_idp' ) );
+            register_activation_hook( __FILE__, array( $this, 'wpconfig_remove_idp' ) ); // remove the definition of activation too as it has become redundant
             register_deactivation_hook( __FILE__, array( $this, 'wpconfig_remove_idp' ) );
 
         }
@@ -148,26 +146,7 @@ if ( ! class_exists( 'SO_Remove_ICL_Promotion' ) ) {
         }
 
         /**
-         * Add the definition that disables the ICanLocalize promotion to wp-config.php.
-         * @source: //wordpress.org/plugins/wp-auto-salts/
-         * @source: //stackoverflow.com/a/24035277/1381553
-         * @return null Return null if wp-config.php doesn't exist or is not writeable.
-         */
-		function wpconfig_add_idp() {
-            
-            if ( false === $this->wp_config || ! $this->soriclp_can_write_to_wp_config() ) {
-                return null;
-            }
-
-		    $config = file_get_contents ( $this->wp_config );
-		    $config = preg_replace ( "/^([\r\n\t ]*)(\<\?)(php)?/i", "<?php define('ICL_DONT_PROMOTE', true);", $config );
-		    
-		    file_put_contents( $this->wp_config, $config, LOCK_EX );
-		    
-		}
-		
-        /**
-         * On deactivation, remove the definition that disables the ICanLocalize promotion from wp-config.php.
+         * On de/activation, remove the ICL_DONT_PROMOTE definition from wp-config.php.
          */
 		function wpconfig_remove_idp() {
 		    
@@ -182,37 +161,54 @@ if ( ! class_exists( 'SO_Remove_ICL_Promotion' ) ) {
     new SO_Remove_ICL_Promotion();
 }
 
+
+
 /**
- * This function checks whether WPML is active (WPML needs to be active for this to have any use)
+ * This function checks whether the WPML Translation Management Addon is active (needs to be active for this to have any use)
  * and gives a warning message with affiliate-link to WPML if it is not active.
  *
  * modified using http://wpengineer.com/1657/check-if-required-plugin-is-active/ and the _no_wpml_warning function
  *
- * @since 1.0
+ * @since 1.0.0
+ * @modified 2.0.0
  */
 
 $plugins = get_option( 'active_plugins' );
 
-$required_plugin = 'sitepress-multilingual-cms/sitepress.php';
+$required_plugin = 'wpml-translation-management/plugin.php';
 
-// multisite throws the error message by default, because the plugin is installed on the network site, therefore check for multisite @since 1.0
+// multisite throws the error message by default, because the plugin is installed on the network site, therefore check for multisite @since 1.0.0
 if ( ! in_array( $required_plugin , $plugins ) && ! is_multisite() ) {
 
 	add_action( 'admin_notices', 'soriclp_no_wpml_warning' );
 
 }
 
+/**
+ * Adjusted warning message to new check and new name
+ *
+ * @modified 2.0.0
+ */
 function soriclp_no_wpml_warning() {
     
     // display the warning message
     echo '<div class="message error"><p>';
     
-    printf( __( 'The <strong>SO Remove ICL Promotion plugin</strong> only works if you have the <a href="%s">WPML</a> plugin installed.', 'so-remove-icl-promotion' ), 
+    printf( __( 'The <strong>SO Remove Translation Services plugin</strong> only works if you have the <a href="%s">Translation Management addon of WPML</a> installed. As you have not you can either remove this plugin (it is useless without the addon) or install the addon.', 'so-remove-icl-promotion' ), 
         'https://wpml.org/?aid=140&affiliate_key=qGikbikRYa9M' );
     
     echo '</p></div>';
     
-    // and deactivate the plugin @since 1.0
+    // and deactivate the plugin @since 1.0.0
     deactivate_plugins( plugin_basename( __FILE__ ) );
+}
+
+
+add_action( 'admin_head', 'so_riclp_style' );
+
+function so_riclp_style() {
+	echo '<style type="text/css">
+	.icl_tm_wrap .icl-admin-information, .icl_tm_wrap > a, .icl_tm_wrap #translation_services > h3, .icl_tm_wrap .js-available-services {display:none;}
+	</style>';
 }
 
