@@ -31,7 +31,7 @@ If you like the SO Remove Translation Services plugin, please consider leaving a
 
 == Installation ==
 
-= Wordpress =
+= WordPress =
 
 Search for "SO Remove Translation Services" and install with the **Plugins > Add New** back-end page.
 
