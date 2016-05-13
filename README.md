@@ -2,6 +2,8 @@
 
 [![plugin version](https://img.shields.io/wordpress/plugin/v/so-remove-icl-promotion.svg)](http://wordpress.org/plugins/so-remove-icl-promotion)
 
+### May 14, 2016: No longer in active development, use at own risk
+
 ###### Last updated on 2015.08.22
 ###### requires at least WordPress 4.0
 ###### tested up to WordPress 4.4
